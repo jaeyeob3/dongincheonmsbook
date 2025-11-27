@@ -1,102 +1,261 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>중학생 추천도서 목록</title>
-  <style>
-    body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
-    h1 { text-align: center; }
-    .menu { text-align: center; margin-bottom: 20px; }
-    .menu button { margin: 5px; padding: 10px 20px; }
-    .book-list { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    .book-card { background: white; padding: 10px; border-radius: 8px; width: 150px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
-    .book-card img { width: 100%; border-radius: 4px; }
-    .detail { display: none; margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .detail img { float: left; margin-right: 20px; width: 150px; }
-    .detail button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동인천중 추천도서</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7aa8d1 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* 헤더 */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+        }
+        .header h1 {
+            font-size: 2.4em;
+            margin-bottom: 10px;
+            font-weight: 900;
+        }
+
+        /* 필터 */
+        .filter-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .category-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .category-btn {
+            padding: 9px 18px;
+            border: 2px solid #fff;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .category-btn.active, .category-btn:hover {
+            background: #fff;
+            color: #1e3c72;
+        }
+
+        /* 검색 */
+        .search-box input {
+            width: 260px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: none;
+            font-size: 0.95em;
+            outline: none;
+        }
+
+        /* 도서 카드 */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+        }
+        .book-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        .book-card:hover {
+            transform: translateY(-6px);
+        }
+        .book-cover {
+            height: 260px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .fallback {
+            background: #2a5298;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            padding: 15px;
+            text-align: center;
+        }
+        .book-info {
+            padding: 13px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .book-title { font-size: 0.95em; font-weight: bold; margin-bottom: 6px; }
+        .book-author { font-size: 0.82em; margin-bottom: 10px; color: #555; }
+
+        /* 버튼 */
+        .btn-wrap {
+            margin-top: auto;
+            display: flex;
+            gap: 5px;
+        }
+        .btn {
+            flex: 1;
+            padding: 8px 6px;
+            font-size: 0.75em;
+            border-radius: 6px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn-yes { background: #c9184a; }
+        .btn-ali { background: #0094c8; }
+        .btn-yes:hover { background: #a01538; }
+        .btn-ali:hover { background: #007aa4; }
+
+        /* 푸터 */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #eee;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8em; }
+            .books-grid { gap: 16px; }
+            .book-cover { height: 200px; }
+        }
+    </style>
 </head>
+
 <body>
+<div class="container">
+    <div class="header">
+        <h1>📚 동인천중 추천도서</h1>
+        <p>중학생을 위한 엄선 도서</p>
+    </div>
 
-<h1>중학생 추천도서 목록</h1>
+    <!-- 검색 + 카테고리 -->
+    <div class="filter-wrap">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="책 제목 검색..." oninput="renderBooks()">
+        </div>
 
-<div class="menu">
-  <button onclick="filterCategory('국어')">국어</button>
-  <button onclick="filterCategory('사회')">사회</button>
-  <button onclick="filterCategory('과학')">과학</button>
-  <button onclick="filterCategory('영어')">영어</button>
-  <button onclick="filterCategory('예술')">예술</button>
-</div>
+        <div class="category-container">
+            <button class="category-btn active" onclick="filterCategory('all', this)">전체</button>
+            <button class="category-btn" onclick="filterCategory('소설', this)">소설</button>
+            <button class="category-btn" onclick="filterCategory('인문/철학', this)">인문/철학</button>
+            <button class="category-btn" onclick="filterCategory('과학', this)">과학</button>
+            <button class="category-btn" onclick="filterCategory('역사', this)">역사</button>
+            <button class="category-btn" onclick="filterCategory('기타', this)">기타</button>
+        </div>
+    </div>
 
-<div class="book-list" id="bookList">
-  <div class="book-card" onclick="showDetail('소나기')">
-    <img src="https://upload.wikimedia.org/wikipedia/ko/thumb/3/3b/Sonagi_cover.jpg/220px-Sonagi_cover.jpg" alt="소나기">
-    <p>소나기</p>
-  </div>
-  <div class="book-card" onclick="showDetail('춘향전')">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Chunhyangjeon.jpg/220px-Chunhyangjeon.jpg" alt="춘향전">
-    <p>춘향전</p>
-  </div>
-  <div class="book-card" onclick="showDetail('파브르 곤충기')">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Fabres_insects.jpg/220px-Fabres_insects.jpg" alt="파브르 곤충기">
-    <p>파브르 곤충기</p>
-  </div>
-</div>
+    <!-- 도서 카드 -->
+    <div id="booksGrid" class="books-grid"></div>
 
-<div class="detail" id="detailBox">
-  <img id="detailImg" src="" alt="책표지">
-  <div>
-    <h2 id="detailTitle">제목</h2>
-    <p id="detailAuthor">저자: </p>
-    <p id="detailPublisher">출판사: </p>
-    <p id="detailGrade">학년: </p>
-    <p id="detailSummary">줄거리: </p>
-    <a href="https://reading.dongincheon.ms.kr" target="_blank">
-      <button>독후감 쓰기</button>
-    </a>
-  </div>
+    <div class="footer">
+        도서 정보는 알라딘에서 제공 | 독후감은 동인천중학교 독서로
+    </div>
 </div>
 
 <script>
-  const books = {
-    '소나기': {
-      img: 'https://upload.wikimedia.org/wikipedia/ko/thumb/3/3b/Sonagi_cover.jpg/220px-Sonagi_cover.jpg',
-      author: '황순원',
-      publisher: 'DB',
-      grade: '1학년',
-      summary: '소년과 소녀 간의 첫사랑을 그린 작품으로, 소녀가 갑작스럽게 목숨을 잃게 되는 이야기.'
-    },
-    '춘향전': {
-      img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Chunhyangjeon.jpg/220px-Chunhyangjeon.jpg',
-      author: '작자 미상',
-      publisher: '고전문학',
-      grade: '2학년',
-      summary: '춘향과 이몽룡의 사랑 이야기로, 신분을 초월한 사랑과 정의를 다룸.'
-    },
-    '파브르 곤충기': {
-      img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Fabres_insects.jpg/220px-Fabres_insects.jpg',
-      author: '장 앙리 파브르',
-      publisher: '과학출판사',
-      grade: '3학년',
-      summary: '곤충의 생태를 관찰하고 기록한 과학 도서로, 자연에 대한 흥미를 높여줌.'
-    }
-  };
+const books = [
+    { id:1, title:"아몬드", author:"손원평", category:"소설", isbn:"9788954643467" },
+    { id:2, title:"체리새우: 비밀글입니다", author:"김윤지", category:"소설", isbn:"9788959411795" },
+    { id:3, title:"죽이고 싶은 아이", author:"유비", category:"소설", isbn:"9791170400462" },
+    { id:4, title:"구덩이", author:"루이스 새커", category:"소설", isbn:"9788937410757" },
+    { id:5, title:"데미안", author:"헤르만 헤세", category:"소설", isbn:"9788932910130" },
 
-  function showDetail(title) {
-    const book = books[title];
-    document.getElementById('detailImg').src = book.img;
-    document.getElementById('detailTitle').innerText = title;
-    document.getElementById('detailAuthor').innerText = '저자: ' + book.author;
-    document.getElementById('detailPublisher').innerText = '출판사: ' + book.publisher;
-    document.getElementById('detailGrade').innerText = '학년: ' + book.grade;
-    document.getElementById('detailSummary').innerText = '줄거리: ' + book.summary;
-    document.getElementById('detailBox').style.display = 'block';
-  }
+    { id:6, title:"법 쫌 아는 10대", author:"정병춘", category:"인문/철학", isbn:"9788931892239" },
+    { id:7, title:"공부 잘하는 중학생은 이렇게 읽습니다", author:"김은정", category:"인문/철학", isbn:"9788964354032" },
 
-  function filterCategory(category) {
-    alert(category + ' 분야의 도서를 보여줍니다 (기능 확장 예정)');
-  }
+    { id:8, title:"수학이 필요한 순간", author:"김용관", category:"과학", isbn:"9788999715174" },
+    { id:9, title:"환경과 생태 쫌 아는 10대", author:"장현영", category:"과학", isbn:"9788931899658" },
+
+    { id:10, title:"30개 도시로 읽는 세계사", author:"조 지무쇼", category:"역사", isbn:"9788959203345" },
+    { id:11, title:"설민석의 조선왕조실록", author:"설민석", category:"역사", isbn:"9788965706748" }
+];
+
+let currentCategory = 'all';
+
+function getCoverUrl(isbn) {
+    return `https://image.aladin.co.kr/product/${isbn.slice(-3)}/${isbn}_1.jpg`;
+}
+
+function filterCategory(category, btn) {
+    currentCategory = category;
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderBooks();
+}
+
+function renderBooks() {
+    const grid = document.getElementById("booksGrid");
+    grid.innerHTML = "";
+    const keyword = document.getElementById("searchInput").value.trim();
+
+    const filteredBooks = books.filter(book => {
+        const matchCategory = (currentCategory === 'all' || book.category === currentCategory);
+        const matchSearch = book.title.includes(keyword);
+        return matchCategory && matchSearch;
+    });
+
+    filteredBooks.forEach(book => {
+        // 알라딘: 책 제목으로 검색 (책정보)
+        const infoUrl = `https://www.aladin.co.kr/search/wsearchresult.aspx?SearchTarget=Book&SearchWord=${encodeURIComponent(book.title)}`;
+        
+        // 동인천중학교 독서로 학교검색(고정)
+        const reviewUrl = "https://read365.edunet.net/PureScreen/SchoolSearch?schoolName=%EB%8F%99%EC%9D%B8%EC%B2%9C%EC%A4%91%ED%95%99%EA%B5%90%EB%8F%84%EC%84%9C%EA%B4%80&provCode=E10&neisCode=E100000620";
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+
+        const imgSrc = getCoverUrl(book.isbn);
+
+        card.innerHTML = `
+            <div class="book-cover">
+                <img src="${imgSrc}" alt="${book.title}"
+                onerror="this.remove(); this.parentNode.innerHTML='<div class=fallback>${book.title}</div>'"/>
+            </div>
+            <div class="book-info">
+                <div class="book-title">${book.title}</div>
+                <div class="book-author">저자: ${book.author}</div>
+                <div class="btn-wrap">
+                    <a class="btn btn-yes" href="${infoUrl}" target="_blank">책정보</a>
+                    <a class="btn btn-ali" href="${reviewUrl}" target="_blank">독후감쓰기</a>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+window.onload = () => renderBooks();
 </script>
-
 </body>
 </html>
