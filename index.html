@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Segoe UI", "Helvetica Neue", sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7aa8d1 100%);
             background-attachment: fixed;
             min-height: 100vh;
@@ -190,13 +190,10 @@ const books = [
     { id:3, title:"죽이고 싶은 아이", author:"유비", category:"소설", isbn:"9791170400462" },
     { id:4, title:"구덩이", author:"루이스 새커", category:"소설", isbn:"9788937410757" },
     { id:5, title:"데미안", author:"헤르만 헤세", category:"소설", isbn:"9788932910130" },
-
     { id:6, title:"법 쫌 아는 10대", author:"정병춘", category:"인문/철학", isbn:"9788931892239" },
     { id:7, title:"공부 잘하는 중학생은 이렇게 읽습니다", author:"김은정", category:"인문/철학", isbn:"9788964354032" },
-
     { id:8, title:"수학이 필요한 순간", author:"김용관", category:"과학", isbn:"9788999715174" },
     { id:9, title:"환경과 생태 쫌 아는 10대", author:"장현영", category:"과학", isbn:"9788931899658" },
-
     { id:10, title:"30개 도시로 읽는 세계사", author:"조 지무쇼", category:"역사", isbn:"9788959203345" },
     { id:11, title:"설민석의 조선왕조실록", author:"설민석", category:"역사", isbn:"9788965706748" }
 ];
@@ -204,7 +201,8 @@ const books = [
 let currentCategory = 'all';
 
 function getCoverUrl(isbn) {
-    return `https://image.aladin.co.kr/product/${isbn.slice(-3)}/${isbn}_1.jpg`;
+    // YES24 이미지 (가장 안정적)
+    return `http://image.yes24.com/goods/01/${isbn.slice(-5, -3)}/${isbn}_M.jpg`;
 }
 
 function filterCategory(category, btn) {
